@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Descendant - The Chosen path</title>
+    <style>
+        :root {
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #10b981;
+            --accent-hover: #059669;
+            --secondary: #3b82f6;
+            --secondary-hover: #2563eb;
+            --border: #334155;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 650px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            letter-spacing: -0.025em;
+        }
+        .meta-info {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+        .meta-info a {
+            color: var(--secondary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .meta-info a:hover {
+            text-decoration: underline;
+        }
+        .desc-box {
+            text-align: left;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 32px;
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #e2e8f0;
+        }
+        .download-zone {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 16px 24px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-primary {
+            background-color: var(--accent);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            font-size: 0.95rem;
+            padding: 12px 20px;
+            width: auto;
+        }
+        .btn-secondary:hover {
+            background-color: rgba(51, 65, 85, 0.5);
+            color: var(--text-main);
+        }
+        .ver-tag {
+            font-size: 0.85rem;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent);
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin-left: 8px;
+            font-weight: 700;
+            vertical-align: middle;
+        }
+        .loading {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Title & Licensing Link -->
+        <h1 id="mod-title">Loading Mod...</h1>
+        <div class="meta-info">
+            <span id="mod-date">Please wait</span> &bull; 
+            <a href="LICENSE.txt" target="_blank">View License</a>
+        </div>
+
+        <!-- Custom Description Loaded from description.html -->
+        <div class="desc-box" id="desc-container">
+            <p class="loading">Loading mod features and details...</p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="download-zone">
+            <a href="#" id="main-download-btn" class="btn btn-primary">
+                Download Latest Release <span class="ver-tag" id="main-ver-tag">...</span>
+            </a>
+            
+            <a href="archive.html" class="btn btn-secondary">
+                View Older Versions Archive
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Configuration Panel: Put your latest file info right here!
+        const config = {
+            title: "My Awesome Mod",
+            latestVersion: "v2.1.0",
+            releaseDate: "August 2026",
+            filename: "my-mod-v2.1.0.jar" // File sitting inside your versions folder
+        };
+
+        // Inject configuration data into UI elements
+        document.getElementById('mod-title').textContent = config.title;
+        document.getElementById('mod-date').textContent = config.releaseDate;
+        
+        const mainBtn = document.getElementById('main-download-btn');
+        mainBtn.href = "versions/" + config.filename;
+        
+        document.getElementById('main-ver-tag').textContent = config.latestVersion;
+
+        // Fetch and seamlessly embed the standalone description file
+        fetch('description.html')
+            .then(response => {
+                if (!response.ok) throw new Error('File not found');
+                return response.text();
+            })
+            .then(data => {
+                document.getElementById('desc-container').innerHTML = data;
+            })
+            .catch(error => {
+                document.getElementById('desc-container').innerHTML = 
+                    `<p style="color:#ef4444;">Failed to load description.html. Please ensure the file exists.</p>`;
+            });
+    </script>
+
+</body>
+</html>

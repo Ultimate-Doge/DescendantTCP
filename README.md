@@ -1,1 +1,0 @@
-# Descendant - The Chosen path
