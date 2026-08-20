@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Version Archive</title>
+    <style>
+        :root {
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --secondary: #3b82f6;
+            --secondary-hover: #2563eb;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 650px;
+        }
+        .header {
+            margin-bottom: 32px;
+        }
+        .back-link {
+            color: var(--secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+        }
+        .archive-note {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-top: 6px;
+        }
+        .file-list {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .file-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.15s ease;
+        }
+        .file-row:last-child {
+            border-bottom: none;
+        }
+        .file-row:hover {
+            background: rgba(51, 65, 85, 0.3);
+        }
+        .file-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .file-name {
+            font-weight: 600;
+            color: var(--text-main);
+            text-decoration: none;
+        }
+        .file-name:hover {
+            color: var(--secondary);
+            text-decoration: underline;
+        }
+        .file-meta {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .dl-icon-btn {
+            background: rgba(51, 65, 85, 0.6);
+            color: var(--text-main);
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            border: 1px solid var(--border);
+        }
+        .dl-icon-btn:hover {
+            background: var(--secondary);
+            border-color: var(--secondary);
+        }
+        .empty-msg {
+            padding: 40px;
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <a href="index.html" class="back-link">&larr; Return to main page</a>
+            <h1>File Archive</h1>
+            <p class="archive-note">Looking for an older build? All previous website folder files are listed below.</p>
+        </div>
+
+        <!-- Automatic List Area fetched from GitHub API -->
+        <div class="file-list" id="archive-container">
+            <div class="empty-msg">Scanning the versions folder...</div>
+        </div>
+    </div>
+
+    <script>
+        // Automatically find out your current GitHub repo path from the URL
+        const pathArray = window.location.pathname.split('/');
+        const repoName = pathArray[1]; 
+        const username = window.location.hostname.split('.')[0];
+
+        // GitHub API endpoint to see files sitting in your folder
+        const apiUrl = `https://api.github.com/repos/${username}/${repoName}/contents/versions`;
+
+        fetch(apiUrl)
+            .then(response => {
+                if (!response.ok) throw new Error('Could not access repository files.');
+                return response.json();
+            })
+            .then(files => {
+                const container = document.getElementById('archive-container');
+                
+                // Filter out any accidental folders/non-files and sort newest/largest strings to top
+                const targetFiles = files
+                    .filter(file => file.type === 'file')
+                    .sort((a, b) => b.name.localeCompare(a.name));
+
+                if (targetFiles.length === 0) {
+                    container.innerHTML = '<div class="empty-msg">No files found inside your versions/ folder yet.</div>';
+                    return;
+                }
+
+                container.innerHTML = ''; // Wipe loading message
+
+                targetFiles.forEach(file => {
+                    const row = document.createElement('div');
+                    row.className = 'file-row';
+                    
+                    // Format byte size to readable MB/KB
+                    const sizeStr = file.size > 1024 * 1024 
+                        ? (file.size / (1024 * 1024)).toFixed(2) + ' MB' 
+                        : (file.size / 1024).toFixed(1) + ' KB';
+
+                    row.innerHTML = `
+                        <div class="file-info">
+                            <a href="${file.download_url}" class="file-name" download>${file.name}</a>
+                            <span class="file-meta">Size: ${sizeStr}</span>
+                        </div>
+                        <a href="${file.download_url}" class="dl-icon-btn" download>Download</a>
+                    `;
+                    container.appendChild(row);
+                });
+            })
+            .catch(error => {
+                document.getElementById('archive-container').innerHTML = 
+                    `<div class="empty-msg" style="color: #ef4444;">
+                        Could not auto-scan folder natively.<br>
+                        <span style="font-size:0.85rem; display:block; margin-top:8px;">
+                            Note: This scanner works instantly once your site is published live on GitHub Pages!
+                        </span>
+                    </div>`;
+            });
+    </script>
+
+</body>
+</html>
